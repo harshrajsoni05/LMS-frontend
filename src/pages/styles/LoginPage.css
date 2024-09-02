@@ -13,7 +13,6 @@
     background-color: #839bc5;
     display: flex;
     width: 55vw; 
-    height: 65vh;
     border-radius: 20px;
     color: #6583b7;
     overflow: hidden;
@@ -64,7 +63,6 @@
 .login-form input {
     width: 100%;
     padding: 12px;
-    margin: 8px 0;
     border: 1px solid #ddd;
     border-radius: 5px;
     color: #6583b7;

@@ -1,232 +1,290 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./styles/CategoryPage.css";
-import WithLayoutComponent from "../hocs/WithLayoutComponent";
+import { useState, useEffect } from "react";
+import {
+  fetchBooks,
+  addBook,
+  updateBook,
+  deleteBook,
+} from "../api/BookServices";
+import { fetchAllCategories } from '../api/CategoryServices';
+import CustomButton from "../components/button";
+import CustomModal from "../components/modal";
 import Table from "../components/Table";
-import searchbar from "../components/searchbar";
-import CustomModal from "../components/Modal";
-import Action from "../components/Action";
+import Searchbar from "../components/Searchbar";
 import back from "../assets/images/go-back.png";
 import next from "../assets/images/go-next.png";
-import CustomButton from "../components/Button";
+import WithLayoutComponent from "../hocs/WithLayoutComponent";
+import useDebouncedValue from "./CategoryPage";
+import Tooltip from "../components/Tooltip";
+import EditIcon from "../assets/images/editicon.png";
+import DeleteIcon from "../assets/images/deleteicon.png";
+import AssignUser from "../assets/images/alloticon.png";
+import Dynamicform from "../components/dynamicform";
 
 function BooksPage() {
   const [books, setBooks] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState(""); // 'edit', 'add', or 'assign'
+  const [categories, setCategories] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState(""); // 'edit' or 'add'
   const [currentData, setCurrentData] = useState({
     title: "",
     author: "",
     quantity: "",
-    userId: "", // for allotting books to a user
+    category_id: "",
+    userId: "",
   });
   const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebouncedValue(searchTerm, 500);
+
+  const getBooks = async () => {
+    try {
+      const data = await fetchBooks(
+        currentPage,
+        pageSize,
+        debouncedSearchTerm.trim()
+      );
+      setBooks(data.content || []);
+      setTotalPages(data.totalPages || 0);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchBooks = async (page = 0, size = 10) => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/api/books?page=${page}&size=${size}`
-        );
+    getBooks();
+  }, [currentPage, debouncedSearchTerm]);
 
-        setBooks(response.data.content); // Extract the content (books) from the paginated response
-        setTotalPages(response.data.totalPages); // Keep track of the total number of pages
-      } catch (error) {
-        console.error("Error fetching books:", error);
+  const getCategories = async () => {
+    try {
+      const data = await fetchAllCategories();
+      console.log(data);
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    getCategories();
+  }, []);
+
+
+
+  const handleAddBook = async (newBook) => {
+    try {
+      if (!newBook.category_id) {
+        throw new Error("Category ID is missing or invalid");
       }
-    };
+  
+      const bookToCreate = {
+        title: newBook.title,
+        author: newBook.author,
+        category_id: parseInt(newBook.category_id, 10),
+        quantity: parseInt(newBook.quantity, 10),
+      };
+  
+      await addBook(bookToCreate);
+      getBooks();
+      handleCloseModal();
+    } catch (error) {
+      console.error("Failed to add book:", error.message);
+    }
+  };
 
-    fetchBooks(currentPage); // Pass the current page to the fetch function
-  }, [currentPage]);
+  const handleEditBook = async (updatedBook) => {
+    try {
+      const bookToUpdate = {
+        id: currentData.id,
+        title: updatedBook.title,
+        author: updatedBook.author,
+        category_id: parseInt(updatedBook.category_id, 10),
+        quantity: parseInt(updatedBook.quantity, 10),
+      };
 
-  const handleOpenModal = (type, data = {}) => {
+      await updateBook(currentData.id,bookToUpdate);
+      getBooks();
+      handleCloseModal();
+    } catch (error) {
+      console.error("Failed to update book:", error);
+    }
+  };
+
+  const handleDelete = async (rowData) => {
+    const id = rowData.id;
+    if (window.confirm('Are you sure you want to delete this Book?')){
+    try {
+      await deleteBook(id);
+      setBooks(books.filter((book) => book.id !== id));
+    } catch (error) {
+      console.error("Failed to delete the book", error);
+    }
+  }
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setCurrentPage(0);
+  };
+
+  const handlePageChange = (page) => {
+    if (page >= 0 && page < totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleOpenModal = (type, rowData = {}) => {
     setModalType(type);
-    setCurrentData({
-      title: data?.title || "",
-      author: data?.author || "",
-      quantity: data?.quantity || "",
-      userId: "", // Reset userId when opening the modal
-      id: data?.id || undefined, // Include the ID if it exists
-    });
-    setModalOpen(true);
+    setCurrentData(rowData);
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setModalOpen(false);
+    setIsModalOpen(false);
+    setCurrentData({
+      title: "",
+      author: "",
+      quantity: "",
+      category_id: "",
+      userId: "",
+    });
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (modalType === "edit") {
-        await axios.put(
-          `http://localhost:8080/api/books/${currentData.id}`,
-          currentData
-        );
-      } else if (modalType === "add") {
-        await axios.post("http://localhost:8080/api/books", currentData);
-      } else if (modalType === "assign") {
-        // Handle assigning a book to a user
-        await axios.post(
-          `http://localhost:8080/api/issuances`,
-          {
-            bookId: currentData.id,
-            userId: currentData.userId,
-          }
-        );
-      }
-      // Refresh the books list after submit
-      const response = await axios.get(
-        `http://localhost:8080/api/books?page=${currentPage}&size=10`
-      );
-      setBooks(response.data.content);
-      setTotalPages(response.data.totalPages); // Update total pages after the change
-      handleCloseModal(); // Close the modal after submit
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!id) {
-      console.error("Invalid ID for deletion:", id);
-      return;
-    }
-    try {
-      await axios.delete(`http://localhost:8080/api/books/${id}`);
-      // Refresh the books list after delete
-      const response = await axios.get(
-        `http://localhost:8080/api/books?page=${currentPage}&size=10`
-      );
-      setBooks(response.data.content);
-      setTotalPages(response.data.totalPages); // Update total pages after the change
-    } catch (error) {
-      console.error("Error deleting book:", error);
-    }
-  };
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      setCurrentPage(newPage); // Update the current page
+  const handleSubmitModal = (data) => {
+    if (modalType === "add") {
+      handleAddBook(data);
+    } else if (modalType === "edit") {
+      handleEditBook(data);
     }
   };
 
   const columns = [
-    { Header: "Title", accessor: "title" },
-    { Header: "Author", accessor: "author" },
-    { Header: "Quantity", accessor: "quantity" },
+    { header: "Title", accessor: "title" },
+    { header: "Author", accessor: "author" },
+    { header: "Category", render: (rowData) => rowData.category.name },
+    { header: "Quantity", accessor: "quantity" },
     {
-      Header: "Actions",
-      Cell: ({ row }) => (
-        <Action
-          onAllot={() => handleOpenModal("assign", row.original)} // Assign a book to a user
-          onEdit={() => handleOpenModal("edit", row.original)} // Edit the book details
-          onDelete={() => handleDelete(row.original.id)} // Delete the book
-        />
-      ),
+      header: "Actions",
+      render: (rowData) => renderActions(rowData),
     },
   ];
 
-  return (
-    <div className="books-page">
-      <div className="category-heading">
-        <h1>Books List</h1>
-        <searchbar />
-        <CustomButton
-          name="Add Book"
-          onClick={() => handleOpenModal("add")}
-          className="add"
-        />
-      </div>
-      <div className="table-container">
-        <Table columns={columns} data={books} />
-      </div>
-      <div className="pagination-controls">
+  const renderActions = (rowData) => (
+    <div className="actionicons">
+      <Tooltip message="Assign">
         <img
-          src={back}
-          alt="back"
-          className={`icon ${currentPage === 0 ? "disabled" : ""}`}
-          onClick={() => handlePageChange(currentPage - 1)}
+          src={AssignUser}
+          alt="Assign User"
+          className="action-icon"
+          onClick={() => console.log("Assigning user", rowData)}
         />
-        <span>
-          Page {currentPage + 1} of {totalPages}
-        </span>
+      </Tooltip>
+
+      <Tooltip message="Edit">
         <img
-          src={next}
-          alt="next"
-          className={`icon ${
-            currentPage >= totalPages - 1 ? "disabled" : ""
-          }`}
-          onClick={() => handlePageChange(currentPage + 1)}
+          src={EditIcon}
+          alt="Edit"
+          className="action-icon"
+          onClick={() => handleOpenModal("edit", rowData)}
         />
-      </div>
-      <CustomModal
-        isOpen={modalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmit}
-        title={
-          modalType === "edit"
-            ? "Edit Book"
-            : modalType === "assign"
-            ? "Assign Book to User"
-            : "Add New Book"
-        }
-        submitText="Save"
-        cancelText="Cancel"
-      >
-        {modalType === "assign" ? (
-          <>
-            <label>
-              User ID:
-              <input
-                type="text"
-                name="userId"
-                value={currentData.userId}
-                onChange={(e) =>
-                  setCurrentData({ ...currentData, userId: e.target.value })
-                }
-              />
-            </label>
-          </>
-        ) : (
-          <>
-            <label>
-              Title:
-              <input
-                type="text"
-                name="title"
-                value={currentData.title}
-                onChange={(e) =>
-                  setCurrentData({ ...currentData, title: e.target.value })
-                }
-              />
-            </label>
-            <label>
-              Author:
-              <input
-                type="text"
-                name="author"
-                value={currentData.author}
-                onChange={(e) =>
-                  setCurrentData({ ...currentData, author: e.target.value })
-                }
-              />
-            </label>
-            <label>
-              Quantity:
-              <input
-                type="number"
-                name="quantity"
-                value={currentData.quantity}
-                onChange={(e) =>
-                  setCurrentData({ ...currentData, quantity: e.target.value })
-                }
-              />
-            </label>
-          </>
-        )}
-      </CustomModal>
+      </Tooltip>
+
+      <Tooltip message="Delete">
+        <img
+          src={DeleteIcon}
+          alt="Delete"
+          className="action-icon"
+          onClick={() => handleDelete(rowData)}
+        />
+      </Tooltip>
     </div>
+  );
+
+  return (
+    <>
+      <div className="category-page">
+        <div className="category-heading">
+          <h1>Books List</h1>
+          <Searchbar searchTerm={searchTerm} onChange={handleSearchChange} />
+          <CustomButton
+            name="Add Book"
+            onClick={() => handleOpenModal("add")}
+            className="add"
+          />
+        </div>
+
+        <div className="table-container">
+          <Table data={books} columns={columns} />
+        </div>
+
+        <div className="pagination-controls">
+          <img
+            src={back}
+            alt="back"
+            className={`icon ${currentPage === 0 ? "disabled" : ""}`}
+            onClick={() => {
+              if (currentPage > 0) handlePageChange(currentPage - 1);
+            }}
+          />
+          <span>
+            Page {currentPage + 1} of {totalPages}
+          </span>
+          <img
+            src={next}
+            alt="next"
+            className={`icon ${currentPage >= totalPages - 1 ? "disabled" : ""}`}
+            onClick={() => {
+              if (currentPage < totalPages - 1) handlePageChange(currentPage + 1);
+            }}
+          />
+        </div>
+      </div>
+
+      
+  <CustomModal isOpen={isModalOpen} onClose={handleCloseModal}>
+  <Dynamicform
+    heading={modalType === "edit" ? "Edit Book" : "Add Book"}
+    fields={[
+      {
+        name: "category_id",
+        type: "select",
+        placeholder: "Select Category",
+        required: true,
+        options: categories.map((category) => ({
+          value: category.id,
+          label: category.name,
+        })),
+        defaultValue: currentData.category_id,
+      },
+      {
+        name: "title",
+        type: "text",
+        placeholder: "Book Title",
+        required: true,
+        defaultValue: currentData.title,
+      },
+      {
+        name: "author",
+        type: "text",
+        placeholder: "Author Name",
+        required: true,
+        defaultValue: currentData.author,
+      },
+      {
+        name: "quantity",
+        type: "number",
+        placeholder: "Enter Quantity",
+        required: true,
+        defaultValue: currentData.quantity,
+      },
+    ]}
+    onSubmit={handleSubmitModal}
+    defaultValues={currentData} // Pass currentData as defaultValues
+  />
+</CustomModal>
+    </>
   );
 }
 

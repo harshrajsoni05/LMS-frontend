@@ -1,5 +1,5 @@
-import { NavLink } from "react-router-dom";
-import CustomButton from "./Button";
+import { NavLink , useNavigate} from "react-router-dom";
+import CustomButton from "./button";
 import "./styles/Sidebar.css";
 
 import book from "../assets/images/book.png";
@@ -7,13 +7,21 @@ import category from "../assets/images/category.png";
 import listcheck from "../assets/images/listcheck.png";
 import useradd from "../assets/images/useradd.png";
 import dash from "../assets/images/dash.png";
-import historyIcon from "../assets/images/category.png";  // Replace with correct icon path
-import profileIcon from "../assets/images/category.png";  // Replace with correct icon path
+import historyIcon from "../assets/images/category.png";  
+import profileIcon from "../assets/images/category.png";  
 
 const Sidebar = ({ role }) => {
-  const handleClick = () => {
-    console.log("Logout clicked");
-  };
+  const navigate = useNavigate(); 
+
+const logout = async () => {
+  try {
+    // Remove JWT token from localStorage
+    localStorage.removeItem("jwtToken");
+    navigate("/"); 
+  } catch (error) {
+    console.error("Error during logout:", error);
+  }
+};
 
   return (
     <div className="container">
@@ -25,7 +33,7 @@ const Sidebar = ({ role }) => {
               <li className="menu-item">
                 <img src={dash} alt="Dashboard" />
                 <NavLink
-                  to="/dashboard-"
+                  to="/dashboard"
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   Dashboard
@@ -34,7 +42,7 @@ const Sidebar = ({ role }) => {
               <li className="menu-item">
                 <img src={book} alt="Books" />
                 <NavLink
-                  to="/books-"
+                  to="/books"
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   Books
@@ -43,7 +51,7 @@ const Sidebar = ({ role }) => {
               <li className="menu-item">
                 <img src={category} alt="Category" />
                 <NavLink
-                  to="/category-"
+                  to="/category"
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   Category
@@ -52,7 +60,7 @@ const Sidebar = ({ role }) => {
               <li className="menu-item">
                 <img src={listcheck} alt="Issuance" />
                 <NavLink
-                  to="/issuance-"
+                  to="/issuance"
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   Issuance
@@ -61,7 +69,7 @@ const Sidebar = ({ role }) => {
               <li className="menu-item">
                 <img src={useradd} alt="Users" />
                 <NavLink
-                  to="/user-"
+                  to="/user"
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   Users
@@ -98,7 +106,7 @@ const Sidebar = ({ role }) => {
           <CustomButton
             name={"Logout"}
             className={"logout-btn"}
-            onClick={handleClick}
+            onClick={logout}
           />
         </div>
       </div>

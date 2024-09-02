@@ -3,11 +3,10 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-top: 2rem;
 }
 
 .custom-table {
-  width: 90%;
+  width: 100%;
   border-collapse: separate; 
   border-spacing: 0;
   margin: 1rem 0;
@@ -47,3 +46,4 @@
 .custom-table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 0.5rem;
 }
+

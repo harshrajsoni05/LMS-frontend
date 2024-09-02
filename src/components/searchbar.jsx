@@ -1,38 +1,33 @@
-import{ useState } from 'react';
+import PropTypes from 'prop-types';
+
 import search from '../assets/images/search.png';
 import './styles/searchbar.css'
 
 
-const searchbar = ({ placeholder, onSearch }) => {
-  const [query, setQuery] = useState(''); // Manage input value with useState
-
-  const handleInputChange = (e) => {
-    setQuery(e.target.value);
-  };
-
-  const handleSearchClick = () => {
-    if (onSearch) {
-      onSearch(query); // Pass the current input value to the parent component
-    }
-  };
-
+const SearchBar = ({ searchTerm, onChange, onSearch }) => {
   return (
     <div className="search-bar">
       <input
         type="text"
         className="search-input"
-        value={query}
-        onChange={handleInputChange} // Update state on input change
-        placeholder={placeholder || 'Search...'}
+        value={searchTerm}
+        onChange={onChange} // Update state on input change
+        placeholder="Search..."
       />
-      <button className="search-button" onClick={handleSearchClick}>
+      <button className="search-button" onClick={onSearch}>
         <img src={search} alt="Search" className="search-icon" />
       </button>
     </div>
   );
 };
 
-export default searchbar;
+SearchBar.propTypes = {
+  searchTerm: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSearch: PropTypes.func, // Optional: If you want to handle the search button click
+};
+
+export default SearchBar;
 
 
 

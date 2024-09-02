@@ -9,8 +9,9 @@
 }
 
 .user-name {
-  font-size: 1.5rem;
+  font-size: 1rem;
   margin-right: 2rem;  
+  color:#000;
 }
 
 .navbar-logo {
@@ -40,11 +41,7 @@
   transform: scale(1.1);
 }
 
-.dashboard-text.active {
-  color: black;
-  font-size: 1.45rem; /* Use 'rem' for consistency */
-  transform: scale(1.1);
-}
+
 
 .navbar-user {
   display: flex;

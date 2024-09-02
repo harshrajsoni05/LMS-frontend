@@ -1,7 +1,7 @@
 .login-form {
   width: 80%;
   text-align: center;
-  height: 70%;
+  
   font-size:1rem;
   margin: 0 auto; /* Centers the form horizontally within its container */
 }
@@ -28,7 +28,6 @@ div.role-selection {
 
 .input-group {
   width: 90%;
-  margin: 10px auto; /* Centers the input group horizontally */
   text-align: left;
 }
 
@@ -101,7 +100,7 @@ div.role-selection {
   cursor: pointer;
   z-index: 1;
   font-weight: bold;
-  color: #333; /* Text color for better contrast */
+  color: #fff; /* Text color for better contrast */
 }
 
 /* The slider element */
@@ -129,3 +128,17 @@ input[type="radio"] {
   display: none;
 }
 
+.input-group .error {
+  border-color: red;
+}
+
+.error-text {
+  color: #af4c4c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.login-btn[disabled] {
+  background-color: grey;
+  cursor: not-allowed;
+}
