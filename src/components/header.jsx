@@ -3,7 +3,7 @@ import { useNavigate} from "react-router-dom";
 
 import admin from '../assets/images/admin.png';
 import user from '../assets/images/user.png';
-import './styles/Header.css';
+import '../styles/Header.css';
 
 const Header = ({ role, userName}) => {
   const navigate = useNavigate(); 

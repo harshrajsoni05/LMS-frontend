@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { fetchIssuances, updateIssuance, deleteIssuance } from "../api/IssuanceServices"; // Adjust the import path as needed
 import CustomModal from "../components/modal";
 import Table from "../components/Table";
-import Searchbar from "../components/Searchbar";
+import SearchBar from "../components/SearchBar";
 import back from "../assets/images/go-back.png";
 import next from "../assets/images/go-next.png";
 import WithLayoutComponent from "../hocs/WithLayoutComponent";
@@ -10,7 +10,7 @@ import Dynamicform from "../components/dynamicform";
 import EditIcon from "../assets/images/editicon.png";
 import DeleteIcon from "../assets/images/deleteicon.png";
 import Tooltip from "../components/Tooltip";
-import './styles/CategoryPage.css';
+import '../styles/CategoryPage.css';
 
 const useDebouncedValue = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -84,9 +84,12 @@ function IssuancesPage() {
   };
 
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearch = () => {
     setCurrentPage(0);
+    getIssuances();
   };
 
   const handlePageChange = (page) => {
@@ -112,23 +115,34 @@ function IssuancesPage() {
     }
   };
 
-  const columns = [
-    
+  const formatDate = (dateString) => {
+    if (!dateString) {
+        return "Pending Return"; 
+    }
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+};
+
+const columns = [
     { header: "S No.", accessor: "serialNo" },
+    { header: "User", render: (rowData) => rowData?.users?.name || "N/A" },
+    { header: "Book", render: (rowData) => rowData?.books?.title || "N/A" },
     { header: "Status", accessor: "status" },
     { header: "Issuance Type", accessor: "issuance_type" },
-    { header: "Issue Date", accessor: "issue_date" },
-    { header: "Return Date", accessor: "return_date" },
-    { header: "User ID", accessor: "user_id" },
-    { header: "Book ID", accessor: "book_id" },
-    
-    
-    
+    {
+      header: "Issue Date",
+      render: (rowData) => formatDate(rowData.issue_date),
+    },
+    {
+      header: "Return Date",
+      render: (rowData) => formatDate(rowData.return_date),
+    },
     {
       header: "Actions",
       render: (rowData) => renderActions(rowData),
     },
-  ];
+];
 
   const renderActions = (rowData) => (
     <div className="actionicons">
@@ -136,6 +150,7 @@ function IssuancesPage() {
         <img
           src={EditIcon}
           alt="Edit"
+          style={{ paddingLeft: '0' }}
           className="action-icon"
           onClick={() => handleOpenModal("edit", rowData)}
         />
@@ -155,14 +170,17 @@ function IssuancesPage() {
   return (
     <>
       <div className="category-page">
-      <div className="category-heading">
-          <h1>Issuances </h1>
-          <Searchbar searchTerm={searchTerm} onChange={handleSearchChange} />
-          
+        <div className="category-heading">
+          <h1>Issuances</h1>
+          <SearchBar
+            searchTerm={searchTerm}
+            onChange={handleSearchChange}
+            onSearch={handleSearch}
+          />
         </div>
 
         <div className="table-container">
-          <Table data={issuances} columns={columns} currentPage={currentPage} pageSize={pageSize}/>
+          <Table data={issuances} columns={columns} currentPage={currentPage} pageSize={pageSize} />
         </div>
 
         <div className="pagination-controls">
@@ -248,5 +266,9 @@ function IssuancesPage() {
     </>
   );
 }
+
+
+
+
 
 export const IssuancewithLayout = WithLayoutComponent(IssuancesPage);

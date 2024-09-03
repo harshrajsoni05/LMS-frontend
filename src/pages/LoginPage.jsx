@@ -1,4 +1,4 @@
-import './styles/LoginPage.css';
+import '../styles/LoginPage.css';
 import backgroundImage from '../assets/images/2.jpg'; // Adjust the path as necessary
 import LoginForm from '../components/LoginForm';
 

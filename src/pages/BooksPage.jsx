@@ -149,6 +149,7 @@ function BooksPage() {
       quantity: "",
       category_id: "",
       userId: "",
+      imageurl:""
     });
   };
 
@@ -172,11 +173,12 @@ function BooksPage() {
   ];
 
   const renderActions = (rowData) => (
-    <div className="actionicons">
+    <div className="actionicons" >
       <Tooltip message="Assign">
         <img
           src={AssignUser}
           alt="Assign User"
+          style={{ paddingLeft: '0' }}
           className="action-icon"
           onClick={() => console.log("Assigning user", rowData)}
         />
@@ -278,7 +280,13 @@ function BooksPage() {
         placeholder: "Enter Quantity",
         required: true,
         defaultValue: currentData.quantity,
-      },
+      },{
+      name: "image url",
+      type: "text",
+      placeholder: "Enter image url",
+      required: true,
+      defaultValue: currentData.imageurl,
+    }
     ]}
     onSubmit={handleSubmitModal}
     defaultValues={currentData} // Pass currentData as defaultValues

@@ -1,6 +1,6 @@
 import { NavLink , useNavigate} from "react-router-dom";
 import CustomButton from "./button";
-import "./styles/Sidebar.css";
+import "../styles/Sidebar.css";
 
 import book from "../assets/images/book.png";
 import category from "../assets/images/category.png";
@@ -9,19 +9,10 @@ import useradd from "../assets/images/useradd.png";
 import dash from "../assets/images/dash.png";
 import historyIcon from "../assets/images/category.png";  
 import profileIcon from "../assets/images/category.png";  
+import UseLogout from "./logout";
 
 const Sidebar = ({ role }) => {
-  const navigate = useNavigate(); 
 
-const logout = async () => {
-  try {
-    // Remove JWT token from localStorage
-    localStorage.removeItem("jwtToken");
-    navigate("/"); 
-  } catch (error) {
-    console.error("Error during logout:", error);
-  }
-};
 
   return (
     <div className="container">
@@ -106,7 +97,7 @@ const logout = async () => {
           <CustomButton
             name={"Logout"}
             className={"logout-btn"}
-            onClick={logout}
+            onClick={ UseLogout()}
           />
         </div>
       </div>

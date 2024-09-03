@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { fetchUsers, updateUser, deleteUser , RegisterUser} from '../api/Users'; // Adjust the import path as needed
-import { fetchAllBooks, createIssuance } from '../api/BookServices'; // Adjust the import path as needed
+import { fetchUsers, updateUser, deleteUser , RegisterUser} from '../api/UserServices'; 
+import { fetchAllBooks} from '../api/BookServices';
+import { addIssuance } from '../api/IssuanceServices'; 
 import CustomModal from '../components/modal';
 import Table from '../components/Table';
 import Searchbar from '../components/Searchbar';
@@ -102,9 +103,8 @@ function UsersPage() {
       }
     }
   };
-
   const handleIssueBook = async () => {
-    if (selectedBook) {
+    if (selectedBook && issueDate && returnDate && status && issuanceType) {
       const issuanceDetails = {
         user_id: currentData.id,
         book_id: selectedBook.id,
@@ -113,14 +113,18 @@ function UsersPage() {
         status: status,
         issuance_type: issuanceType,
       };
+  
       try {
-        await createIssuance(issuanceDetails);
-        handleCloseModal();
+        await addIssuance(issuanceDetails);
+        handleCloseModal(); // Close the modal on success
       } catch (error) {
         console.error('Failed to create issuance:', error);
       }
+    } else {
+      console.error('All fields are required to create an issuance');
     }
   };
+  
 
 
   
@@ -170,6 +174,7 @@ function UsersPage() {
       getUsers();
       handleCloseModal();
     }
+    
   };
 
   // Define Table Columns
@@ -186,6 +191,7 @@ function UsersPage() {
             <img
               src={assign}
               alt="Assign Book"
+              style={{ paddingLeft: '0' }}
               className="action-icon"
               onClick={() => handleOpenModal('assign', rowData)}
             />

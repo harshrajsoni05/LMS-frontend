@@ -1,7 +1,7 @@
-import './styles/LoginForm.css';
+import '../styles/LoginForm.css';
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setRole, setUserName } from '../redux/userSlice';
+import { setRole, setUserName } from '../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
@@ -48,7 +48,6 @@ const LoginForm = () => {
     }
   };
 
-  // Validate the password
   const validatePassword = (errors) => {
     if (!password) {
       errors.password = "Password is required";
@@ -56,7 +55,6 @@ const LoginForm = () => {
     
   };
 
-  // Function to handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -71,14 +69,18 @@ const LoginForm = () => {
 
     await loginUser();
   };
-
-  // Function to perform the login action
+  const base64Encode = (str) => {
+    return btoa(unescape(encodeURIComponent(str)));
+  };
+  
   const loginUser = async () => {
+    const encodedPassword = base64Encode(password);
+  
     const credentials = {
       usernameOrPhoneNumber: username,
-      password,
+      password: password,  // Use the Base64 encoded password
     };
-
+  
     try {
       const response = await fetch('http://localhost:8080/api/login', {
         method: 'POST',
@@ -87,19 +89,19 @@ const LoginForm = () => {
         },
         body: JSON.stringify(credentials),
       });
-
+  
       if (!response.ok) {
         throw new Error('Login failed');
       }
-
+  
       const data = await response.json();
       const token = data.jwtToken;
       localStorage.setItem("token", token);
-
+  
       // Dispatch role and username to Redux store
       dispatch(setRole(role));
       dispatch(setUserName(username));
-
+  
       navigate("/dashboard");
     } catch (error) {
       setErrors({ submit: "Invalid username or password!" });

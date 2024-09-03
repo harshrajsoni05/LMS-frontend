@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
 import search from '../assets/images/search.png';
-import './styles/searchbar.css'
+import '../styles/searchbar.css'
 
 
 const SearchBar = ({ searchTerm, onChange, onSearch }) => {

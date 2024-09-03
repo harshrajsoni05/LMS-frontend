@@ -11,7 +11,9 @@ const fetchUsers = async (page = 0, pagesize = 10, search = "") => {
         page: page,
         size: pagesize,
         search: trimmedSearchTerm, 
+        role: "ROLE_USER"
       },
+      
     });
     return response.data;
   } catch (error) {

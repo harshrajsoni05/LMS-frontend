@@ -1,0 +1,106 @@
+.dashboard {
+  display: flex;
+  margin-top:1rem;
+  flex-wrap: wrap;
+  padding-right:3.5rem;
+  padding-left:3.5rem;
+  justify-content: space-around;
+}
+
+.dashboard-card {
+  background-color: #c6d8ea;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  margin:2rem;
+  margin-bottom:1rem;
+  width: auto;
+  height: 7rem;
+  transition:transform 0.3s ease; 
+  text-align: center;
+}
+
+.dashboard-card:hover{
+  transform:scale(1.05);
+}
+
+.dashboard-card h2 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  color:#506892;
+
+}
+
+.dashboard-card p {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #000000; /* Darker text color */
+  font-weight: bold;
+}
+
+
+.dashboard-card img{
+width:3rem;
+}
+
+
+
+.latest-books {
+  background-color: #f8f9fa; /* Light background for contrast */
+}
+
+.latest-books h2 {
+  color: #506892; /* Matching the dashboard heading color */
+}
+
+.latest-books-container {
+  display: flex;
+  flex-wrap: wrap;
+  width:100vw;
+  margin-left:2rem;
+  margin-right:2rem;
+  justify-content: space-around;
+  gap: 1rem; /* Space between book cards */
+}
+
+.book-card {
+  background-color: #e6ecf5; /* White background for the cards */
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+
+  padding: 0.4rem;
+  width: 10rem; /* Adjust width as needed */
+  text-align: center;  
+  border-color:#c6d8ea;
+  transition: transform 0.3s ease;
+  border-style: solid;
+  border-width: 4px;
+}
+
+.book-card:hover {
+  transform: scale(1.02);
+}
+
+.book-image {
+  width: 8rem;
+  height: 11rem; 
+  border-radius: 4px; 
+}
+
+.book-title {
+  font-size: 0.9rem;
+  color: #506892;
+}
+
+.book-author {
+  font-size: 0.7rem;
+  color: #000; 
+}
+.dropdown-menu button:hover {
+  background-color: #e0e0e0; 
+}
+
+.recent-books-heading h2 {
+  font-size: 1.2rem;
+  color: #506892; 
+}

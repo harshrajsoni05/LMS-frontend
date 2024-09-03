@@ -47,3 +47,27 @@
   border-bottom-right-radius: 0.5rem;
 }
 
+.custom-table th {
+  position: relative;
+  padding-right: 2rem; 
+}
+
+.custom-table th .react-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #fff; 
+}
+
+.custom-table th .react-icon.default {
+  color: #ccc
+}
+
+.custom-table th .react-icon.asc {
+  color: #fff; 
+}
+
+.custom-table th .react-icon.desc {
+  color: #fff; 
+}

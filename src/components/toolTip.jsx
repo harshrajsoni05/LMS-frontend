@@ -1,4 +1,4 @@
-import './styles/Tooltip.css'; // Import the CSS for styling the tooltip
+import '../styles/Tooltip.css'; // Import the CSS for styling the tooltip
 
 const Tooltip = ({ children, message }) => {
   return (
