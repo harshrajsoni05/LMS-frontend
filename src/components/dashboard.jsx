@@ -82,7 +82,7 @@ const Dashboard = () => {
         <h2>Issued Books</h2>
         <p>{data.issuancesCount}</p>
       </div>
-
+      
       <div className="recent-books-heading">
         <h2>Recently Added Collection</h2>
       </div>

@@ -4,7 +4,7 @@ const API_BASE_URL = "/users";
 
 const fetchUsers = async (page = 0, pagesize = 10, search = "") => {
   try {
-    const trimmedSearchTerm = search.trim(); // Trim the search term
+    const trimmedSearchTerm = search.trim(); 
     const response = await axiosInstance.get(`${API_BASE_URL}`, {
 
       params: {
@@ -35,7 +35,7 @@ const RegisterUser = async (UserData) => {
 
 const updateUser = async (id, UserData) => {
   try {
-    const response = await axiosInstance.patch(`${API_BASE_URL}/${id}`, UserData);
+    const response = await axiosInstance.put(`${API_BASE_URL}/${id}`, UserData);
     return response.data;
   } catch (error) {
     console.error("Error updating UserData:", error);
@@ -52,6 +52,22 @@ const deleteUser = async (id) => {
   }
 };
 
-// This function isn't needed based on the provided URLs, but if needed in future, it can be added similarly to books.
+const SearchByNumber = async (number) => {
+  try {
+    const response = await axiosInstance.get(`${API_BASE_URL}`, {
 
-export { fetchUsers, RegisterUser, updateUser, deleteUser };
+      params: {
+        phoneNumber: number,
+        
+      },
+      
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Users:", error);
+    throw error;
+  }
+};
+
+
+export { SearchByNumber,fetchUsers, RegisterUser, updateUser, deleteUser };

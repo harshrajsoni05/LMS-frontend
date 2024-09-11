@@ -4,13 +4,12 @@ const axiosInstance = axios.create({
   baseURL: "http://localhost:8080/api",
 });
 
-// Add a request interceptor to include the token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); 
-    console.log(token)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const jwtToken = localStorage.getItem("jwtToken"); 
+    console.log(jwtToken)
+    if (jwtToken) {
+      config.headers.Authorization = `Bearer ${jwtToken}`;
     }
     return config;
   },

@@ -1,3 +1,4 @@
+import axios from "axios";
 import axiosInstance from "./axiosInstance";
 
 const API_BASE_URL = "/books";
@@ -44,18 +45,14 @@ const addBook = async (bookData) => {
 
 const updateBook = async (id, bookData) => {
   try {
-    // Ensure `id` and `bookData` are correctly set
     if (!id || !bookData) {
       throw new Error('ID and book data are required for updating a book');
     }
 
-    // Make the PUT request to update the book
     const response = await axiosInstance.put(`${API_BASE_URL}/${id}`, bookData);
 
-    // Return the response data
     return response.data;
   } catch (error) {
-    // Log and rethrow the error for further handling
     console.error("Error updating book:", error.response ? error.response.data : error.message);
     throw error;
   }
@@ -85,5 +82,6 @@ const assignBookToUser = async (bookId, userId) => {
     throw error;
   }
 };
+
 
 export { fetchAllBooks,createIssuance,fetchBooks, addBook, updateBook, deleteBook, assignBookToUser };

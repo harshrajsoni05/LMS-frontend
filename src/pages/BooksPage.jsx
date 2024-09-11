@@ -6,6 +6,7 @@ import {
   deleteBook,
 } from "../api/BookServices";
 import { fetchAllCategories } from '../api/CategoryServices';
+import { addIssuance } from "../api/IssuanceServices";
 import CustomButton from "../components/button";
 import CustomModal from "../components/modal";
 import Table from "../components/Table";
@@ -30,13 +31,43 @@ function BooksPage() {
     author: "",
     quantity: "",
     category_id: "",
-    userId: "",
+    userId: ""
+    
   });
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [issueDate, setIssueDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
+  const [status, setStatus] = useState('issued');
+  const [issuanceType, setIssuanceType] = useState('library');
   const debouncedSearchTerm = useDebouncedValue(searchTerm, 500);
+
+  const handleIssueBook = async () => {
+    if (selectedBook && issueDate  && status && issuanceType) {
+      const issuanceDetails = {
+        user_id: currentData.id,
+        book_id: selectedBook.id,
+        issue_date: issueDate,
+        return_date: returnDate || "",
+        status: "Issued",
+        issuance_type: issuanceType,
+      };
+      
+      console.log("issuanceDetails->>>>>" ,issuanceDetails)
+      try {
+        await addIssuance(issuanceDetails);
+        handleCloseModal(); // Close the modal on success
+      } catch (error) {
+        console.error('Failed to create issuance:', error);
+      }
+    } else {
+      console.error('All fields are required to create an issuance');
+    }
+  };
 
   const getBooks = async () => {
     try {

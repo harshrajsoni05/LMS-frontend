@@ -213,7 +213,7 @@ function CategoryPage() {
             },
             {
               name: "description",
-              type: "text",
+              type: "textarea",
               placeholder: "Description",
               required: false,
               defaultValue: currentData.description,

@@ -48,8 +48,13 @@
 
 .modal-form-heading {
   display: flex;
+
   justify-content: left;
   color: #6583b7; /* Dark blue heading text */
+}
+
+.modal-form-heading h2{
+  font-size:1.7rem;
 }
 
 .modal-form-input-div {
@@ -73,26 +78,23 @@
   border-color: #D3D3D3;
   padding: 0.2rem 0.2rem;
   border-radius: 0.3125rem;
-  transition: border-color 0.3s ease; /* Smooth border color transition */
+  transition: border-color 0.3s ease; 
 }
 
 .modal-form-input input:focus,
 .modal-form-input select:focus {
-  border-color: #0056b3; /* Dark blue border on focus */
-  outline: none; /* Remove default outline */
+  border-color: #0056b3; 
+  outline: none; 
 }
 
 .modal-form-input select {
-  background-color: #fff; /* White background for select dropdown */
-  padding-right: 2.8rem; /* Space for the dropdown arrow */
+  background-color: #fff; 
+  padding-right: 2.8rem; 
 }
 
 .modal-form-input select:focus {
-  background-color: #e0f3ff; /* Light blue background on focus */
+  background-color: #e0f3ff; 
 }
-
-
-
 
 .modal-form-input select::-webkit-scrollbar {
   display: none;

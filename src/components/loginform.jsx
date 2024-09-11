@@ -1,113 +1,90 @@
 import '../styles/LoginForm.css';
 import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { setRole, setUserName } from '../redux/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+// CSS
+import '../styles/LoginForm.css'
+
+// Components
+import CustomButton from '../components/button'
+
+// Functions
+import { login } from '../api/auth'
+import { loginUser } from '../redux/authActions'
+
+// Constants
+
+
+const initialErrors = {
+  username: '',
+  password: ''
+}
+
 const LoginForm = () => {
-  const [role, setRoleState] = useState('user'); // Default role
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const auth = useSelector(state => state.auth);
+
+  const [role, setRoleState] = useState('user'); 
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('')
   const [placeholderText, setPlaceholderText] = useState("Enter Phone Number");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+
+  const [errors, setErrors] = useState(initialErrors);
+
+  useEffect (() => {
+    if (auth && auth.jwtToken) {
+      if (auth.role === 'ROLE_ADMIN') {
+        navigate('/dashboard');
+      } else {
+        navigate('/userhistory');
+      }
+    }
+  }, [auth]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // if (!validateLogin()) {
+    //   return;
+    // }
+    try {
+      const { data } = await login(username, password);
+      dispatch(loginUser(data));
+      window.localStorage.setItem('jwtToken', data.jwtToken);
+      
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
+
 
   useEffect(() => {
     setPlaceholderText(role === "admin" ? "Enter Email" : "Enter Phone Number");
   }, [role]);
 
-  // Function to handle role change
+//   useEffect(() => {
+//     if (auth && auth.jwtjwtToken) {
+//       if (auth.role === 'ROLE_ADMIN') {
+//         navigate('/dashboard');
+//       } else if (auth.role === 'ROLE_USER') {
+//         navigate('/userHistory');
+//       }
+//     }
+//   }, [auth, navigate]);
+
   const handleRoleChange = (event) => {
     setRoleState(event.target.value);
-    setUsername("");  // Clear the username field
-    setPassword("");  // Clear the password field
-  };
-  
-
-  // Function to validate the form inputs
-  const validate = () => {
-    let errors = {};
-
-    validateUsername(errors);
-    validatePassword(errors);
-
-    return errors;
+    setUsername("");
+    setPassword("");
   };
 
-  // Validate username or phone number based on the role
-  const validateUsername = (errors) => {
-    if (!username) {
-      errors.username = "Username or phone number is required";
-    } else if (role === "admin" && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(username)) {
-      errors.username = "Enter a valid email address";
-    } else if (role === "user" && !/^\d{8,12}$/.test(username)) {
-      errors.username = "Enter a valid phone number";
-    }
-  };
-
-  const validatePassword = (errors) => {
-    if (!password) {
-      errors.password = "Password is required";
-    } 
-    
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setIsSubmitting(true);
-    
-    const validationErrors = validate();
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      setIsSubmitting(false);
-      return;
-    }
-
-    await loginUser();
-  };
-  const base64Encode = (str) => {
-    return btoa(unescape(encodeURIComponent(str)));
-  };
-  
-  const loginUser = async () => {
-    const encodedPassword = base64Encode(password);
-  
-    const credentials = {
-      usernameOrPhoneNumber: username,
-      password: password,  // Use the Base64 encoded password
-    };
-  
-    try {
-      const response = await fetch('http://localhost:8080/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-  
-      const data = await response.json();
-      const token = data.jwtToken;
-      localStorage.setItem("token", token);
-  
-      // Dispatch role and username to Redux store
-      dispatch(setRole(role));
-      dispatch(setUserName(username));
-  
-      navigate("/dashboard");
-    } catch (error) {
-      setErrors({ submit: "Invalid username or password!" });
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="login-form">
@@ -130,7 +107,6 @@ const LoginForm = () => {
             checked={role === 'admin'}
             onChange={handleRoleChange}
           />
-
           <div className="switch">
             <label htmlFor="user" className="switch-label">User</label>
             <div className="slider"></div>
@@ -154,7 +130,7 @@ const LoginForm = () => {
         <div className="input-group">
           <label htmlFor="password" className="visually-hidden"></label>
           <input
-            type="text"
+            type="password" 
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -163,13 +139,14 @@ const LoginForm = () => {
           />
           {errors.password && <p className="error-text">{errors.password}</p>}
         </div>
+        {errors.submit && <p className="error-text">{errors.submit}</p>}
 
-        <button type="submit" className="login-btn" >Login</button>
-       
+        <button type="submit" className="login-btn" disabled={isSubmitting}>
+          Login
+        </button>
       </form>
-      {errors.submit && <p className="error-text">{errors.submit}</p>}
     </div>
   );
-};
+}
 
 export default LoginForm;

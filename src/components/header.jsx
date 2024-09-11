@@ -10,7 +10,7 @@ const Header = ({ role, userName}) => {
 
   const onLogout = async () => {
     try {
-      // Remove JWT token from localStorage
+      // Remove JWT jwtToken from localStorage
       localStorage.removeItem("jwtToken");
       navigate("/"); 
     } catch (error) {

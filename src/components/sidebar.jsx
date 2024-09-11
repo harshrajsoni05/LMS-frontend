@@ -1,7 +1,8 @@
-import { NavLink , useNavigate} from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import CustomButton from "./button";
 import "../styles/Sidebar.css";
-
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../redux/authActions";
 import book from "../assets/images/book.png";
 import category from "../assets/images/category.png";
 import listcheck from "../assets/images/listcheck.png";
@@ -9,17 +10,24 @@ import useradd from "../assets/images/useradd.png";
 import dash from "../assets/images/dash.png";
 import historyIcon from "../assets/images/category.png";  
 import profileIcon from "../assets/images/category.png";  
-import UseLogout from "./logout";
 
-const Sidebar = ({ role }) => {
+const Sidebar = ({ username, role }) => {
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('jwtToken');
+    dispatch(logoutUser());
+    navigate('/');
+  }
 
   return (
     <div className="container">
       <div className="sidebar-menu">
         <ul className="menu-list">
           {/* Common items for admin role */}
-          {role === "admin" && (
+          {role === "ROLE_ADMIN" && (
             <>
               <li className="menu-item">
                 <img src={dash} alt="Dashboard" />
@@ -70,7 +78,7 @@ const Sidebar = ({ role }) => {
           )}
           
           {/* Items for user role */}
-          {role === "user" && (
+          {role === "ROLE_USER" && (
             <>
               <li className="menu-item">
                 <img src={historyIcon} alt="History" />
@@ -97,7 +105,7 @@ const Sidebar = ({ role }) => {
           <CustomButton
             name={"Logout"}
             className={"logout-btn"}
-            onClick={ UseLogout()}
+            onClick={handleLogout}
           />
         </div>
       </div>

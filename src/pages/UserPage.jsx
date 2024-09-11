@@ -14,7 +14,7 @@ import back from '../assets/images/go-back.png';
 import next from '../assets/images/go-next.png';
 import EditIcon from '../assets/images/editicon.png';
 import DeleteIcon from '../assets/images/deleteicon.png';
-import assign from '../assets/images/alloticon.png';
+import assign from '../assets/images/bookaddd.png';
 
 const useDebouncedValue = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -33,7 +33,6 @@ const useDebouncedValue = (value, delay) => {
 };
 
 function UsersPage() {
-  // State
   const [users, setUsers] = useState([]);
   const [books, setBooks] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,6 +84,11 @@ function UsersPage() {
         number: updatedUser.number,
         role: updatedUser.role,
       };
+  
+      if (updatedUser.password && updatedUser.password === updatedUser.confirmPassword) {
+        userToUpdate.password = updatedUser.password;
+      }
+  
       await updateUser(currentData.id, userToUpdate);
       getUsers();
       handleCloseModal();
@@ -92,6 +96,7 @@ function UsersPage() {
       console.error('Failed to update user:', error);
     }
   };
+  
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
@@ -103,17 +108,19 @@ function UsersPage() {
       }
     }
   };
+
   const handleIssueBook = async () => {
-    if (selectedBook && issueDate && returnDate && status && issuanceType) {
+    if (selectedBook && issueDate  && status && issuanceType) {
       const issuanceDetails = {
         user_id: currentData.id,
         book_id: selectedBook.id,
         issue_date: issueDate,
-        return_date: returnDate,
-        status: status,
+        return_date: returnDate || "",
+        status: "Issued",
         issuance_type: issuanceType,
       };
-  
+      
+      console.log("issuanceDetails->>>>>" ,issuanceDetails)
       try {
         await addIssuance(issuanceDetails);
         handleCloseModal(); // Close the modal on success
@@ -155,21 +162,36 @@ function UsersPage() {
     setStatus('issued');
     setIssuanceType('library');
   };
-  const handleRegister = async(userdata)=>{
-    try{
-      RegisterUser(userdata);
-      getBooks();
+
+  const generatePassword = (length = 8) => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      password += characters[randomIndex];
     }
-    catch(error){
-      console.log(error);
-    }
+    return password;
+  };
+
+  const handleRegister = async (userdata) => {
+  try {
+    // Auto-generate a password
+    const generatedPassword = generatePassword(); 
+    const updatedUserData = { ...userdata, password: generatedPassword };
+    console.log("User registered-> " + JSON.stringify(updatedUserData)) 
+    await RegisterUser(updatedUserData);
+    getUsers();
+    handleCloseModal();
+  } catch (error) {
+    console.log(error);
   }
+};
 
   const handleSubmitModal = (data) => {
     if (modalType === 'edit') {
       handleEditUser(data);
     } else if (modalType === 'register') {
-      console.log("User registered-> " + JSON.stringify(data))  
+       
       handleRegister(data);
       getUsers();
       handleCloseModal();
@@ -218,9 +240,17 @@ function UsersPage() {
   ];
 const handleBookSelection = (e) => {
   const selectedBookId = e.target.value;
-  const selectedBook = books.content.find(book => book.id === parseInt(selectedBookId, 10));
-  setSelectedBook(selectedBook);
+
+  // Only proceed if books array is defined and not empty
+  if (books?.length) {
+    const selectedBook = books.find(book => book.id === parseInt(selectedBookId, 10));
+    setSelectedBook(selectedBook);
+  } else {
+    console.error("Books array is not available.");
+  }
 };
+
+
 
   return (
     <>
@@ -261,111 +291,89 @@ const handleBookSelection = (e) => {
   {modalType === 'assign' ? (
     <div>
       <h2>Assign Book</h2>
+      <div>
+        <h1>{currentData.name}</h1>
+      </div>
+      <div>
+        <label htmlFor="bookSelect">Select Book</label>
+        <select id="bookSelect" value={selectedBook?.id || ''} onChange={handleBookSelection}>
+          <option value="" disabled>Select a book</option>
 
-      <label htmlFor="bookSelect">Select Book</label>
-      <select
-        id="bookSelect"
-        value={selectedBook?.id || ''}
-        onChange={handleBookSelection}
-      >
-        <option value="" disabled>Select a book</option>
-        {books.content
-
-          .map(book => (
+          {books.map(book => (
             <option key={book.id} value={book.id}>
               {book.title}
             </option>
           ))}
-      </select>
 
-      <Dynamicform
-        heading="Assign Book"
-        fields={[
-          {
-            name: 'issueDate',
-            type: 'datetime-local',
-            placeholder: 'Issue Date',
-            required: true,
-            defaultValue: issueDate,
-            onChange: e => setIssueDate(e.target.value),
-          },
-          {
-            name: 'returnDate',
-            type: 'datetime-local',
-            placeholder: 'Return Date',
-            required: true,
-            defaultValue: returnDate,
-            onChange: e => setReturnDate(e.target.value),
-          },
-          {
-            name: 'status',
-            type: 'select',
-            options: [
-              { value: 'issued', label: 'Issued' },
-              { value: 'returned', label: 'Returned' },
-            ],
-            placeholder: 'Status',
-            defaultValue: status,
-            onChange: e => setStatus(e.target.value),
-          },
-          {
-            name: 'issuanceType',
-            type: 'select',
-            options: [
-              { value: 'library', label: 'Library' },
-              { value: 'in-house', label: 'In-House' },
-            ],
-            placeholder: 'Issuance Type',
-            defaultValue: issuanceType,
-            onChange: e => setIssuanceType(e.target.value),
-          },
-        ]}
-        onSubmit={handleIssueBook}
-      />
+
+        </select>
+      </div>
+      <div>
+        <label htmlFor="issueDate">Issue Date</label>
+        <input
+          type="datetime-local"
+          id="issueDate"
+          value={issueDate}
+          onChange={e => setIssueDate(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="issuanceType">Issuance Type</label>
+        <select
+          id="issuanceType"
+          value={issuanceType}
+          onChange={e => setIssuanceType(e.target.value)}
+        >
+          <option value="Library">Library</option>
+          <option value="In House">In House</option>
+        </select>
+      </div>
+      <CustomButton name="Issue Book" onClick={handleIssueBook} />
     </div>
-  
-        ) : modalType === 'edit' ? (
-          <Dynamicform
-            heading="Edit User"
-            fields={[
-              { name: 'name', type: 'text', placeholder: 'Name', defaultValue: currentData.name },
-              { name: 'email', type: 'email', placeholder: 'Email', defaultValue: currentData.email },
-              { name: 'number', type: 'text', placeholder: 'Number', defaultValue: currentData.number },
-              {
-                name: 'role',
-                type: 'select',
-                options: [
-                  { value: 'ROLE_USER', label: 'User' },
-                  { value: 'ROLE_ADMIN', label: 'Admin' },
-                ],
-                placeholder: 'Role',
-              },
-            ]}
-            onSubmit={handleSubmitModal}
-          />
-        ) : modalType === 'register' ? (
-          <Dynamicform
-            heading="Register User"
-            fields={[
-              { name: 'name', type: 'text', placeholder: 'Name' },
-              { name: 'email', type: 'email', placeholder: 'Email' },
-              { name: 'number', type: 'text', placeholder: 'Number' },
-              { name: 'password', type: 'password', placeholder: 'Password' },
-              { name: 'confirmPassword', type: 'password', placeholder: 'Confirm Password' },
-              {
-                name: 'role',
-                type: 'select',
-                options: [
-                  { value: 'ROLE_USER', label: 'User' },
-                  { value: 'ROLE_ADMIN', label: 'Admin' },
-                ],
-                placeholder: 'Role',
-              },
-            ]}
-            onSubmit={handleSubmitModal}
-          />
-        ) : null}
-      </CustomModal>
+  ) : modalType === 'edit' ? (
+    <Dynamicform
+      heading="Edit User"
+      fields={[
+        { name: 'name', type: 'text', placeholder: 'Name', defaultValue: currentData.name },
+        { name: 'email', type: 'email', placeholder: 'Email', defaultValue: currentData.email },
+        { name: 'number', type: 'text', placeholder: 'Number', defaultValue: currentData.number },
+        { name: 'password', type: 'password', placeholder: 'Password' },
+        { name: 'confirmPassword', type: 'password', placeholder: 'Confirm Password' },
+        {
+          name: 'role',
+          type: 'select',
+          options: [
+            { value: 'ROLE_USER', label: 'User' },
+            { value: 'ROLE_ADMIN', label: 'Admin' },
+          ],
+          placeholder: 'Role',
+        },
+      ]}
+      onSubmit={handleSubmitModal}
+      defaultValues={currentData}
+    />
+  ) : modalType === 'register' ? (
+    <Dynamicform
+      heading="Register User"
+      fields={[
+        { name: 'name', type: 'text', placeholder: 'Name' },
+        { name: 'email', type: 'email', placeholder: 'Email' },
+        { name: 'number', type: 'text', placeholder: 'Number' },
+        {
+          name: 'role',
+          type: 'select',
+          options: [
+            { value: 'ROLE_USER', label: 'User' },
+            { value: 'ROLE_ADMIN', label: 'Admin' },
+          ],
+          placeholder: 'Role',
+        },
+      ]}
+      onSubmit={handleSubmitModal}
+    />
+  ) : null}
+</CustomModal>
+
     </>
   );
 }
